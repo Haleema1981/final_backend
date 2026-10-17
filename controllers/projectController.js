@@ -1,0 +1,8 @@
+const mongoose=require('mongoose');
+const Project=require('../models/Project');
+const handleValidation=(err,res)=>{if(err.name==='ValidationError')return res.status(400).json({message:Object.values(err.errors).map(e=>e.message).join('. ')});return res.status(500).json({message:'Server error'});};
+exports.getProjects=async(req,res)=>{try{const projects=await Project.find().sort({createdAt:-1});res.status(200).json(projects)}catch(e){handleValidation(e,res)}};
+exports.getProject=async(req,res)=>{try{if(!mongoose.isValidObjectId(req.params.id))return res.status(400).json({message:'Invalid project ID'});const p=await Project.findById(req.params.id);if(!p)return res.status(404).json({message:'Research project not found'});res.status(200).json(p)}catch(e){handleValidation(e,res)}};
+exports.createProject=async(req,res)=>{try{const p=await Project.create(req.body);res.status(201).json(p)}catch(e){handleValidation(e,res)}};
+exports.updateProject=async(req,res)=>{try{if(!mongoose.isValidObjectId(req.params.id))return res.status(400).json({message:'Invalid project ID'});const p=await Project.findByIdAndUpdate(req.params.id,req.body,{new:true,runValidators:true});if(!p)return res.status(404).json({message:'Research project not found'});res.status(200).json(p)}catch(e){handleValidation(e,res)}};
+exports.deleteProject=async(req,res)=>{try{if(!mongoose.isValidObjectId(req.params.id))return res.status(400).json({message:'Invalid project ID'});const p=await Project.findByIdAndDelete(req.params.id);if(!p)return res.status(404).json({message:'Research project not found'});res.status(200).json({message:'Research project deleted successfully',id:req.params.id})}catch(e){handleValidation(e,res)}};
